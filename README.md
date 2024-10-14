@@ -28,4 +28,115 @@ Este é o espaço dedicado ao relatório do desenvolvimento do projeto "Desafio 
         * Levels: parecido com o airflow, só que ao envez de fluxo de ar, mede-se o nível de líquidos nas 7 colunas de flutuação;
         * Laboratory: possui também as porcentagens de sílica e de ferro presentes no material analisado;
         * Processvariables: possui a data e a hora da coleta dos dados, as taxas de fluxo de amido, amina e polpa de minério no processo analisado e o pH e a densidade dessa polpa de minério;
-    Observa-se então que são dados referentes a um processo de análise de conteudo mineral de uma mineradora.
+    Foi realizado um método *.info()* presente na biblioteca de manipulação de dados do python chamada Pandas, com o objetivo de categorizar o tipo de dados de cada collection, tendo como resultado:
+        *Airflow:
+            RangeIndex: 737453 entries, 0 to 737452
+            Data columns (total 9 columns):
+            #   Column                        Non-Null Count   Dtype
+            ---  ------                        --------------   -----
+            0   _id                           737453 non-null  object
+            1   date                          737453 non-null  datetime64[ns]
+            2   Flotation Column 01 Air Flow  737453 non-null  object
+            3   Flotation Column 02 Air Flow  737453 non-null  object
+            4   Flotation Column 03 Air Flow  737453 non-null  object
+            5   Flotation Column 04 Air Flow  737453 non-null  object
+            6   Flotation Column 05 Air Flow  737453 non-null  object
+            7   Flotation Column 06 Air Flow  737453 non-null  object
+            8   Flotation Column 07 Air Flow  737453 non-null  object
+            dtypes: datetime64[ns](1), object(8)
+            memory usage: 50.6+ MB
+        *Levels:
+            RangeIndex: 737453 entries, 0 to 737452
+            Data columns (total 9 columns):
+            #   Column                     Non-Null Count   Dtype
+            ---  ------                     --------------   -----
+            0   _id                        737453 non-null  object
+            1   date                       737453 non-null  datetime64[ns]
+            2   Flotation Column 01 Level  737453 non-null  object
+            3   Flotation Column 02 Level  737453 non-null  object
+            4   Flotation Column 03 Level  737453 non-null  object
+            5   Flotation Column 04 Level  737453 non-null  object
+            6   Flotation Column 05 Level  737453 non-null  object
+            7   Flotation Column 06 Level  737453 non-null  object
+            8   Flotation Column 07 Level  737453 non-null  object
+            dtypes: datetime64[ns](1), object(8)
+            memory usage: 50.6+ MB
+        *Laboratory:
+            RangeIndex: 737453 entries, 0 to 737452
+            Data columns (total 3 columns):
+            #   Column         Non-Null Count   Dtype
+            ---  ------         --------------   -----
+            0   _id            737453 non-null  object
+            1   % Iron Feed    737453 non-null  object
+            2   % Silica Feed  737453 non-null  object
+            dtypes: object(3)
+            memory usage: 16.9+ MB
+        *ProcessVariables:
+            RangeIndex: 737453 entries, 0 to 737452
+            Data columns (total 7 columns):
+            #   Column            Non-Null Count   Dtype
+            ---  ------            --------------   -----
+            0   _id               737453 non-null  object
+            1   date              737453 non-null  object
+            2   Starch Flow       737453 non-null  object
+            3   Amina Flow        737453 non-null  object
+            4   Ore Pulp Flow     737453 non-null  object
+            5   Ore Pulp pH       737453 non-null  object
+            6   Ore Pulp Density  737453 non-null  object
+            dtypes: object(7)
+            memory usage: 39.4+ MB
+**4-ETL (Extract, Transform, Load)**
+**4.1- Pre processamento (Limpeza dos dados):**
+    Também utilizando o Pandas, usei o método *.isnull().sum()* que mostra a quantidade de dados nulos por coluna de cada collection, obtendo o seguinte resultado:
+        *Airflow:                                  *Levels:
+            _id                             0          _id                          0 
+            date                            0          date                         0 
+            Flotation Column 01 Air Flow    0          Flotation Column 01 Level    0 
+            Flotation Column 02 Air Flow    0          Flotation Column 02 Level    0 
+            Flotation Column 03 Air Flow    0          Flotation Column 03 Level    0 
+            Flotation Column 04 Air Flow    0          Flotation Column 04 Level    0 
+            Flotation Column 05 Air Flow    0          Flotation Column 05 Level    0 
+            Flotation Column 06 Air Flow    0          Flotation Column 06 Level    0 
+            Flotation Column 07 Air Flow    0          Flotation Column 07 Level    0 
+     
+        *ProcessVariables:                          *Laboratory
+            _id                 0                      _id              0
+            date                0                      % Iron Feed      0
+            Starch Flow         0                      % Silica Feed    0
+            Amina Flow          0
+            Ore Pulp Flow       0
+            Ore Pulp pH         0
+            Ore Pulp Density    0
+
+    Dessa forma, podemos concluir que não há dados faltantes nessa Base de Dados.
+
+    Outra parte da limpeza dos dados é a verificação de dados duplicados. Utilizando a função *.duplicated()*, verifiquei para todas as 4 coleções a existência de dados duplicados, que poderiam influenciar no processo, e foi constatado que não há nenhum em nenhuma das coleções, como mostra a saida da função:
+
+    *Airflow            *Levels             *Laboratory         *ProcessVariables:
+    0         False     0         False     0         False     0         False 
+    1         False     1         False     1         False     1         False 
+    2         False     2         False     2         False     2         False 
+    3         False     3         False     3         False     3         False 
+    4         False     4         False     4         False     4         False 
+              ...                 ...                 ...                 ...   
+    737448    False     737448    False     737448    False     737448    False 
+    737449    False     737449    False     737449    False     737449    False 
+    737450    False     737450    False     737450    False     737450    False 
+    737451    False     737451    False     737451    False     737451    False 
+    737452    False     737452    False     737452    False     737452    False 
+    Length: 737453      Length: 737453      Length: 737453      Length: 737453  
+
+    O último passo seria o tratamento de outliers, valores descrepantes que podem influenciar na análise dos dados. Eu decidi utilizar o método de IQR (Interquartil Range), que dé uma técnica estatística que permite identificar outliers, ou seja, valores que se diferenciam drasticamente dos demais em um conjunto de dados.Um valor é considerado outlier se estiver abaixo do limite inferior (Q1–1,5 * IQR) ou acima do limite superior (Q3 + 1,5 * IQR). Não foi encontrado nenhum outlier para nenhuma das coleções, como mostra a saida:
+
+    Outliers na coleção 'airflow':
+
+    Outliers na coleção 'levels':
+
+    Outliers na coleção 'laboratory':
+
+    Outliers na coleção 'processvariables':
+
+    Concluindo o processo de limppeza dos dados, podemos observar e especular que essa Base de Dados ja pode ter sido pre-processada, pois é muito difícil existir uma base que foi extraida de um minimundo real e não possuir dados faltantes, dados duplicados e nem outliers. Outra possibilidade seria desta base ter sido gerada por algum algoritmo.
+
+
+
