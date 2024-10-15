@@ -138,5 +138,18 @@ Este é o espaço dedicado ao relatório do desenvolvimento do projeto "Desafio 
 
     Concluindo o processo de limppeza dos dados, podemos observar e especular que essa Base de Dados ja pode ter sido pre-processada, pois é muito difícil existir uma base que foi extraida de um minimundo real e não possuir dados faltantes, dados duplicados e nem outliers. Outra possibilidade seria desta base ter sido gerada por algum algoritmo.
 
+    Para realizar a analise da limpeza, que no caso não se mostrou necessária, basta compilar o código *limpeza.py*.
 
+**4.2- Normalização:**
+    Em seguida, realizei a normalização dos dados para produzir e assim garantir uma certa consistência das informações. Isso inclui a conversão de colunas de data para um formato padrão e a transformação de colunas numéricas, como os fluxos de ar e os níveis das colunas de flutuação, para valores de tipo *float*. As colunas referentes a alimentação de ferro e sílica, além das variaveis de processo como o fluxo de polpa de minério, pH e densidade, também doram normalizadas para garantir que os dados fossem facilmente utilizaveis em analises futuras.
+
+    Escolhi o método de normalização Min-Max Scaling por ser simples e eficiente, focando na conversão direta de valores numéricos e na padronização das datas. Isso evita problemas com formatos inconsistentes, como o uso da virgula ao inves de pontos, e preserva a integridade dos valores originais. A normalização escolhida garante que os dados estejam prontos para análises detalhadas, sem distorções que poderiam surgir com outros métodos, como a padronização.
+    
+    O código foi feito de maneira automatizada, usando como referência códigos presentes no stackoverflow e delftstack, permitindo que qualquer campo relevante dentro das collections fosse identificado e ajustado. Isso garante que todos os dados estejam no formato correto.
+
+    Para efetuar a normalização, basta compilar o código *normalizacao.py*.
+
+**4.3- Agregação:**
+    Decidi realizar uma agragação entre as 3 collections que possuem a conula em comum 'data'. Para isso, realizei um merge entre as 4 collections existentes, verificando se cada uma continha a coluna em comum 'data', que no casso a collection *laboratory* não possuia. Essa agregação tinha como objetivo juntar essas 3 collections em um só DataFrame para que eu, no futuro, possa analisar e tirar alguma conclusão sobre os dados destas collcetions em conjunto. 
+    Entretanto, ao rodar o código, notei que 5 linhas de medição de pH e densidade da polpa de minério apareceram como 'NaN', o que é estranho pois ja havia realizado a análise de dados faltantes e não tinha acusado a presença de nenhum na Base de Dados. Isso pode ser explicada pelo processo de merge (união) das coleções. No meu código, foi utilizada a técnica de outer join para combinar as tabelas, o que preserva todos os dados das coleções mesmo que não haja correspondência exata em determinadas colunas. Assim, se uma linha de uma coleção, por exemplo, airflow, não tiver correspondência direta de data ou ID com outra coleção, como processvariables, as colunas de processvariables terão valores nulos (NaN) nessa linha do resultado final. Por enquanto, não vou realizar nenhum procedimento de limpeza com estes dados faltantes, pois será melhor decidir qual metodo usar quando eu for realizar a análize no futuro.
 
